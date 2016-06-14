@@ -5,13 +5,13 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
 </head>
 <style>
   html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 100%;
     box-sizing:border-box;
     background: white;
     font-family: "Roboto", Helvetica, Arial, sans-serif;
@@ -87,8 +87,8 @@
 </style>
 <body>
   <div class="api-token-input">
-    <input type="password" id="apitoken" placeholder="CircleCI API token" autofocus></input>
-    <input type="submit" value="Begin" id="submit"></input>
+    <input type="password" id="apitoken" placeholder="CircleCI API token" autofocus />
+    <input type="submit" value="Begin" id="submit" />
   </div>
 
   <ul id="radiator" class="fill-height-or-more">
@@ -97,7 +97,7 @@
 
   <script>
     var circleApiToken
-    var updateInterval = 10 * 1000
+    var updateInterval = 600 * 1000
 
     var radiator = document.getElementById('radiator')
     var apiToken = document.getElementById('apitoken')
@@ -107,6 +107,10 @@
     function createRepository(repository) {
       function createBranch(branch, branchName) {
         function createListItem() {
+          if (new Date(branch.recent_builds[0].pushed_at) <= Date.today().add(-2).days()) {
+            return
+          }
+
           var buildIsRunning = branch.running_builds.length != 0
           var build = buildIsRunning ? branch.running_builds[0] : branch.recent_builds[0]
           var status = buildIsRunning ? build.status : build.outcome
@@ -130,7 +134,8 @@
         }
 
         var jobListItem = createListItem()
-        radiator.innerHTML = radiator.innerHTML + jobListItem.outerHTML
+        if (jobListItem)
+          radiator.innerHTML = radiator.innerHTML + jobListItem.outerHTML
       }
 
       var project = repository.reponame
